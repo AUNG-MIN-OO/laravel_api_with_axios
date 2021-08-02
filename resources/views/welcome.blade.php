@@ -36,14 +36,14 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="">
+            <form name="editForm">
                 <div class="modal-body">
                     <div class="form-group">
                         <input type="text" name="title" placeholder="Title" class="form-control">
                         <span id="titleError" class="text-danger font-weight-bold"></span>
                     </div>
                     <div class="form-group">
-                        <textarea rows="10" name="desc" placeholder="Description" class="form-control"></textarea>
+                        <textarea rows="10" name="description" placeholder="Description" class="form-control"></textarea>
                         <span id="descError" class="text-danger font-weight-bold"></span>
                     </div>
                 </div>
@@ -106,7 +106,7 @@
                                         '<td>'+item.title+'</td>'+
                                         '<td>'+item.description+'</td>'+
                                         '<td>'+
-                                            '<button class="btn btn-warning mr-2 btn-sm" data-toggle="modal" data-target="#updateBox">Edit'+'</button>'+
+                                            '<button class="btn btn-warning mr-2 btn-sm" data-toggle="modal" data-target="#updateBox" onclick="editBtn('+item.id+')">Edit'+'</button>'+
                                             '<button class="btn btn-danger btn-sm">Delete'+'</button>'+
                                         '</td>'+
                                     '<tr>';
@@ -154,6 +154,25 @@
             console.log(error.response)
         })
     }
+
+    // Edit
+    var editForm = document.forms['editForm'];
+    var editTitle = editForm['title'];
+    var editDesc = editForm['description'];
+
+    function editBtn(postId){
+        axios.get('/api/posts/'+postId)
+        .then(response => {
+            // console.log(response,response.data['title'],response.data.description);
+            editTitle.value = response.data.title;
+            editDesc.value = response.data.description;
+        })
+        .catch(error => console.log(error));
+    }
+
+    //Update
+
+
 </script>
 </body>
 </html>

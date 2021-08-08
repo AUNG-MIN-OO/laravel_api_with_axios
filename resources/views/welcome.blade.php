@@ -49,7 +49,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
                 </div>
             </form>
         </div>
@@ -97,9 +97,10 @@
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 <script>
+    //Read
+    var tableBody = document.getElementById("tableBody");
     axios.get('api/posts')
     .then(response => {
-        var tableBody = document.getElementById("tableBody");
         response.data.forEach(function (item){
             tableBody.innerHTML += '<tr>'+
                                         '<td>'+item.id+'</td>'+
@@ -107,7 +108,7 @@
                                         '<td>'+item.description+'</td>'+
                                         '<td>'+
                                             '<button class="btn btn-warning mr-2 btn-sm" data-toggle="modal" data-target="#updateBox" onclick="editBtn('+item.id+')">Edit'+'</button>'+
-                                            '<button class="btn btn-danger btn-sm">Delete'+'</button>'+
+                                            '<button class="btn btn-danger btn-sm"  onclick="deleteBtn('+item.id+')">Delete'+'</button>'+
                                         '</td>'+
                                     '<tr>';
         });
@@ -137,6 +138,15 @@
                     $(".toast").toast('show');
                 });
                 document.getElementById('successMsg').innerHTML = response.data.msg;
+                tableBody.innerHTML += '<tr>'+
+                    '<td>'+response.data[0].id+'</td>'+
+                    '<td>'+response.data[0].title+'</td>'+
+                    '<td>'+response.data[0].description+'</td>'+
+                    '<td>'+
+                    '<button class="btn btn-warning mr-2 btn-sm" data-toggle="modal" data-target="#updateBox" onclick="editBtn('+response.data[0].id+')">Edit'+'</button>'+
+                    '<button class="btn btn-danger btn-sm"  onclick="deleteBtn('+response.data[0].id+')">Delete'+'</button>'+
+                    '</td>'+
+                    '<tr>';
             }else{
                 if (response.data.msg.title == "The title field is required."){
                     document.getElementById('titleError').innerHTML = response.data.msg.title;
@@ -159,8 +169,10 @@
     var editForm = document.forms['editForm'];
     var editTitle = editForm['title'];
     var editDesc = editForm['description'];
+    var updatePostId;
 
     function editBtn(postId){
+        updatePostId = postId;
         axios.get('/api/posts/'+postId)
         .then(response => {
             // console.log(response,response.data['title'],response.data.description);
@@ -171,7 +183,48 @@
     }
 
     //Update
+    var updateBox = document.getElementById('updateBox');
+    editForm.onsubmit = function (e){
+        e.preventDefault();
+        axios.put('/api/posts/'+updatePostId,{
+            title : editTitle.value,
+            description : editDesc.value
+        })
+        .then(response => {
+            console.log(response);
+            $(document).ready(function(){
+                $(".toast").toast({ delay: 3000 });
+                $(".toast").toast('show');
+            });
+            document.getElementById('successMsg').innerHTML = response.data.message;
+            $('#updateBox').modal('hide');
+        })
+        .catch(err => console.log(err));
+    }
 
+    //Delete
+    function deleteBtn(postId){
+        axios.delete('api/posts/'+postId)
+        .then(response => {
+            // console.log(response);
+            $(document).ready(function(){
+                $(".toast").toast({ delay: 3000 });
+                $(".toast").toast('show');
+            });
+            document.getElementById('successMsg').innerHTML = response.data.message;
+
+            tableBody.innerHTML += '<tr>'+
+                '<td>'+response.data[0].id+'</td>'+
+                '<td>'+response.data[0].title+'</td>'+
+                '<td>'+response.data[0].description+'</td>'+
+                '<td>'+
+                '<button class="btn btn-warning mr-2 btn-sm" data-toggle="modal" data-target="#updateBox" onclick="editBtn('+response.data[0].id+')">Edit'+'</button>'+
+                '<button class="btn btn-danger btn-sm"  onclick="deleteBtn('+response.data[0].id+')">Delete'+'</button>'+
+                '</td>'+
+                '<tr>';
+        })
+        .catch(err => console.log(err));
+    }
 
 </script>
 </body>
